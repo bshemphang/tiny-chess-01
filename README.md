@@ -11,9 +11,9 @@ MAKEFUN_ENV_URL=http://127.0.0.1:8080 python3 main.py
 ```
 
 It plays the trial through the env at `MAKEFUN_ENV_URL`: `POST /game
-{}` serves the game in play, `POST /move {"game": n, "move": "<uci>"}` plays a move (the house answers at once with its own), and the loop ends when the env answers status `"done"`. It exits if `MAKEFUN_ENV_URL` is not set. If the env refuses a move (HTTP 400), it falls back to the first move of the env's own `legal_moves` list, and resigns only if that is refused too.
+{}` serves the game in play, `POST /move {"game": n, "move": "<uci>"}` plays a move (the house answers at once), and the loop ends when the env answers status `"done"`. It exits if `MAKEFUN_ENV_URL` is not set. On an HTTP 400 refusal it falls back to the first move of the env's `legal_moves` list, resigning only if that is refused too.
 
-`main.py` is a packed form: the readable source is `src.py` in this folder (uncommitted), packed by the kit's `makefun compress` into the makefun-compress/v1 stub around an LZMA stream of the source. Re-pack after any change with, as a command of its own:
+`main.py` is a packed form: the readable source is `src.py` in this folder (uncommitted), packed by the kit's `makefun compress` into the makefun-compress/v1 stub around an LZMA stream. Re-pack after any change with, as a command of its own:
 
 ```sh
 node <kit>/cli/makefun.mjs compress src.py --out main.py
@@ -32,7 +32,7 @@ Move generation was validated with perft against known counts (startpos, Kiwipet
 
 ## Practice trial, env protocol (2026-11-13, local)
 
-Ran the packed `main.py` against the kit's own env server with the practice trial-0 gauntlet, all 8 games, 0 illegal moves (no HTTP 400s): **1 won, 2 drawn, 5 lost (2.0/8), implied Elo about 1080**, below the 1154 practice bar for this one trial. The win was by checkmate vs nodes-100k (1392); the draws were threefold repetitions vs depth-3 (1073) and nodes-500k (1596). The game-1 loss was by time on the first move (game ended at 8 plies, engine never moved); without it the same trial implies about 1260. The cold first move benchmarks at 3.84-6.09 s, inside the 10 s limit, and the loss coincided with heavy concurrent work on this shared VM, so it reads as contention rather than engine slowness. If a second practice trial (run quiet) also loses a move on time, cut the node budget (`L` in `src.py` from 180,000 to 100,000, then re-compress) and re-test.
+Ran the packed `main.py` against the kit's own env server, practice trial-0 gauntlet, all 8 games, 0 illegal moves: **1 won, 2 drawn, 5 lost (2.0/8), implied Elo about 1080**, below the 1154 practice bar for this one trial. The game-1 loss was by time on the first move (engine never moved); without it the same trial implies about 1260. Cold first move benchmarks at 3.84-6.09 s, inside the 10 s limit, and the loss coincided with heavy concurrent work on this shared VM, so it reads as contention rather than engine slowness.
 
 ## Limits
 
