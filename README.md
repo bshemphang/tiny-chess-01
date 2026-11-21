@@ -4,7 +4,7 @@
 
 # TinyChess 4K
 
-A compact chess engine in a single `main.py` (3,630 bytes), for the
+A compact chess engine in a single `main.py` (3,632 bytes), for the
 "strongest chess engine in 4 KB of Python" bounty. Python 3.13 standard
 library only. No model calls; its only network use is the trial env.
 
@@ -26,9 +26,9 @@ node <kit>/cli/makefun.mjs compress src.py --out main.py
 ## Design
 
 - **Board:** 0x88 array, signed piece codes, incremental Zobrist hash (fixed-seed LCG, so hashes are deterministic).
-- **Search:** negamax with alpha-beta, iterative deepening to fixed depth 6, quiescence on captures (with check evasions and delta pruning), null-move pruning, check extensions, transposition table, killer moves and history heuristic, MVV-LVA ordering.
-- **Evaluation:** material plus piece-square tables (midgame and endgame king tables), bishop-pair bonus. No randomness, no wall clock.
-- **Determinism:** every move is decided by a fixed depth plus a fixed 180,000-node budget. Worst case observed is about 6 s per move on a shared 1.5-CPU VM, inside the 10 s/move limit.
+- **Search:** negamax with alpha-beta, iterative deepening to a depth cap of 13, quiescence on captures (with check evasions and delta pruning), null-move pruning, check extensions, transposition table, killer moves and history heuristic, MVV-LVA ordering.
+- **Evaluation:** material plus piece-square tables (midgame and endgame king tables), bishop-pair bonus, tempo bonus. No randomness, no wall clock.
+- **Determinism:** every move is decided by a fixed depth cap plus a fixed 100,000-node budget. Worst case observed is 5.6 s per move on a shared 1.5-CPU VM, inside the 10 s/move limit.
 
 ## Correctness
 
@@ -37,6 +37,8 @@ Move generation was validated with perft against known counts (startpos, Kiwipet
 ## Practice trial, env protocol (2026-11-14, local)
 
 v2 (PVS search, tapered PeSTO-style eval, bishop-pair bonus) ran the packed `main.py` against the kit's env server, practice trial-0, all 8 games, 0 illegal moves: **2 won, 4 drawn, 2 lost, Elo 1396**.
+
+v3 (depth cap 13, 100k-node budget, null-move H>2 guard, tempo +10) ran the same trial-0, all 8 games, 0 illegal moves, 0 forfeits: **4 won, 1 drawn, 3 lost, Elo 1464** (2026-11-21, local). Worst move 5.6 s.
 
 ## Limits
 
